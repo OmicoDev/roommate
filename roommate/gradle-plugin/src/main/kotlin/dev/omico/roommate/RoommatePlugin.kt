@@ -15,6 +15,7 @@
  */
 package dev.omico.roommate
 
+import dev.omico.roommate.internal.RoommateExtensionImpl
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
@@ -32,10 +33,11 @@ class RoommatePlugin : Plugin<Project> {
 
     private fun Project.applyRoommate(pluginId: String): Unit =
         plugins.withId(pluginId) {
-            extensions.create<RoommateExtension>(
+            extensions.create(
+                publicType = RoommateExtension::class,
                 name = "roommate",
+                instanceType = RoommateExtensionImpl::class,
                 constructionArguments = arrayOf(
-                    objects,
                     plugins,
                     resources,
                     dependencies,

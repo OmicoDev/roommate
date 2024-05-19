@@ -15,62 +15,8 @@
  */
 package dev.omico.roommate
 
-import dev.omico.roommate.internal.RoommateDependencies
-import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.plugins.PluginContainer
-import org.gradle.api.provider.Property
-import org.gradle.api.resources.ResourceHandler
-import org.gradle.configurationcache.extensions.capitalized
-import org.gradle.kotlin.dsl.property
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension
-import javax.inject.Inject
-
-open class RoommateExtension @Inject constructor(
-    objects: ObjectFactory,
-    private val plugins: PluginContainer,
-    private val resources: ResourceHandler,
-    private val dependencies: DependencyHandler,
-    private val kotlinProjectExtension: KotlinProjectExtension,
-) {
-    private val roomVersion: Property<String> = objects.property()
-    private lateinit var roommateDependencies: RoommateDependencies
-
-    fun roomVersion(version: String) {
-        roomVersion.set(version)
-        roommateDependencies = RoommateDependencies(resources, version)
-        when (kotlinProjectExtension) {
-            is KotlinSingleTargetExtension<*> ->
-                dependencies.add("implementation", roommateDependencies.roomRuntime)
-            is KotlinMultiplatformExtension ->
-                dependencies.add("commonMainImplementation", roommateDependencies.roomRuntime)
-        }
-    }
-
-    fun withKsp(vararg targets: String) {
-        checkRoomVersionIsPresent()
-        plugins.withId("com.google.devtools.ksp") {
-            when (kotlinProjectExtension) {
-                is KotlinSingleTargetExtension<*> ->
-                    dependencies.add("ksp", roommateDependencies.roomCompiler)
-                is KotlinMultiplatformExtension ->
-                    kotlinProjectExtension.targets.configureEach {
-                        if (name !in targets) return@configureEach
-                        dependencies.add("ksp${name.capitalized()}", roommateDependencies.roomCompiler)
-                    }
-            }
-        }
-    }
-
-    fun applySqliteBundleTo(vararg configurations: String) {
-        checkRoomVersionIsPresent()
-        configurations.forEach { configuration ->
-            dependencies.add(configuration, roommateDependencies.sqliteBundle)
-        }
-    }
-
-    private fun checkRoomVersionIsPresent(): Unit =
-        check(roomVersion.isPresent) { "The roomVersion must be set before calling other functions." }
+interface RoommateExtension {
+    fun roomVersion(version: String)
+    fun withKsp(vararg targets: String)
+    fun applySqliteBundleTo(vararg configurations: String)
 }
