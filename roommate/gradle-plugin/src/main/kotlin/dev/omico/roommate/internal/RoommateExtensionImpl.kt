@@ -45,6 +45,9 @@ internal abstract class RoommateExtensionImpl @Inject constructor(
 
     override fun withKsp(vararg targets: String) {
         checkRoomVersionIsPresent()
+        check(plugins.hasPlugin("com.google.devtools.ksp")) {
+            "The com.google.devtools.ksp plugin must be applied in the plugins block before calling withKsp."
+        }
         plugins.withId("com.google.devtools.ksp") {
             when (kotlinProjectExtension) {
                 is KotlinSingleTargetExtension<*> ->
