@@ -15,8 +15,12 @@
  */
 package dev.omico.roommate
 
+import org.gradle.api.artifacts.dsl.DependencyHandler
+
 interface RoommateExtension {
     fun roomVersion(version: String)
-    fun withKsp(vararg targets: String)
-    fun applySqliteBundleTo(vararg configurations: String)
+    val DependencyHandler.roomCompiler: String
+    val DependencyHandler.roomRuntime: String
+    val DependencyHandler.roomPaging: String
+    val DependencyHandler.sqliteBundle: String
 }

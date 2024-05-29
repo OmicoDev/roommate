@@ -1,6 +1,6 @@
 # Roommate
 
-Roommate is a companion plugin that simplifies the introduction of Jetpack Room configuration.
+Roommate is a companion plugin that simplifies the introduction of Jetpack Room configuration. It can automatically find the Jetpack Sqlite version that matches Jetpack Room.
 
 ## Usage
 
@@ -59,8 +59,15 @@ plugins {
 
 roommate {
     roomVersion(versions.androidx.room) // The version of the Room library.
-    withKsp("android", "desktop")
-    applySqliteBundleTo("desktopMainImplementation")
+    dependencies {
+        commonMainImplementation(roomPaging)
+        desktopMainImplementation(sqliteBundle)
+    }
+    dependencies {
+        // "roomCompiler" is defined by Roommate.
+        kspAndroid(roomCompiler)
+        kspDesktop(roomCompiler)
+    }
 }
 ```
 

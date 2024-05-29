@@ -30,6 +30,7 @@ internal class RoommateDependencies(
         }
 
     val roomCompiler: String = "androidx.room:room-compiler:$roomVersion"
+    val roomPaging: String = "androidx.room:room-paging:$roomVersion"
     val roomRuntime: String = "androidx.room:room-runtime:$roomVersion"
     val sqliteBundle: String = "androidx.sqlite:sqlite-bundled:$sqliteVersion"
 }

@@ -17,16 +17,13 @@ package dev.omico.roommate.internal
 
 import dev.omico.roommate.RoommateExtension
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.plugins.PluginContainer
 import org.gradle.api.resources.ResourceHandler
-import org.gradle.configurationcache.extensions.capitalized
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension
 import javax.inject.Inject
 
 internal abstract class RoommateExtensionImpl @Inject constructor(
-    private val plugins: PluginContainer,
     private val resources: ResourceHandler,
     private val dependencies: DependencyHandler,
     private val kotlinProjectExtension: KotlinProjectExtension,
@@ -43,31 +40,20 @@ internal abstract class RoommateExtensionImpl @Inject constructor(
         }
     }
 
-    override fun withKsp(vararg targets: String) {
-        checkRoomVersionIsPresent()
-        check(plugins.hasPlugin("com.google.devtools.ksp")) {
-            "The com.google.devtools.ksp plugin must be applied in the plugins block before calling withKsp."
-        }
-        plugins.withId("com.google.devtools.ksp") {
-            when (kotlinProjectExtension) {
-                is KotlinSingleTargetExtension<*> ->
-                    dependencies.add("ksp", roommateDependencies.roomCompiler)
-                is KotlinMultiplatformExtension ->
-                    kotlinProjectExtension.targets.configureEach {
-                        if (name !in targets) return@configureEach
-                        dependencies.add("ksp${name.capitalized()}", roommateDependencies.roomCompiler)
-                    }
-            }
-        }
-    }
+    override val DependencyHandler.roomCompiler: String
+        get() = requireRoommateDependencies().roomCompiler
 
-    override fun applySqliteBundleTo(vararg configurations: String) {
-        checkRoomVersionIsPresent()
-        configurations.forEach { configuration ->
-            dependencies.add(configuration, roommateDependencies.sqliteBundle)
-        }
-    }
+    override val DependencyHandler.roomRuntime: String
+        get() = requireRoommateDependencies().roomRuntime
 
-    private fun checkRoomVersionIsPresent(): Unit =
+    override val DependencyHandler.roomPaging: String
+        get() = requireRoommateDependencies().roomPaging
+
+    override val DependencyHandler.sqliteBundle: String
+        get() = requireRoommateDependencies().sqliteBundle
+
+    private fun requireRoommateDependencies(): RoommateDependencies {
         check(::roommateDependencies.isInitialized) { "The roomVersion must be set before calling other functions." }
+        return roommateDependencies
+    }
 }

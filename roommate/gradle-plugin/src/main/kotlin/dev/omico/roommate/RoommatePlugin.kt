@@ -38,7 +38,6 @@ class RoommatePlugin : Plugin<Project> {
                 name = "roommate",
                 instanceType = RoommateExtensionImpl::class,
                 constructionArguments = arrayOf(
-                    plugins,
                     resources,
                     dependencies,
                     extensions.getByName("kotlin") as KotlinProjectExtension,
