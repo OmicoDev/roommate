@@ -1,4 +1,4 @@
-rootProject.name = "roommate-initialization"
+rootProject.name = "roommate-build-logic-initialization"
 
 pluginManagement {
     includeBuild("../gradm")
