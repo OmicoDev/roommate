@@ -16,27 +16,43 @@
 package dev.omico.roommate.internal
 
 import dev.omico.roommate.RoommateExtension
+import dev.omico.roommate.internal.utility.capitalize
+import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinSingleTargetExtension
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import javax.inject.Inject
 
 internal abstract class RoommateExtensionImpl @Inject constructor(
-    private val resources: ResourceHandler,
-    private val dependencies: DependencyHandler,
-    private val kotlinProjectExtension: KotlinProjectExtension,
+    private val project: Project,
 ) : RoommateExtension {
     private lateinit var roommateDependencies: RoommateDependencies
 
     override fun roomVersion(version: String) {
-        roommateDependencies = RoommateDependencies(resources, version)
-        when (kotlinProjectExtension) {
+        roommateDependencies = RoommateDependencies(project.resources, version)
+        when (project.kotlinExtension) {
             is KotlinSingleTargetExtension<*> ->
-                dependencies.add("implementation", roommateDependencies.roomRuntime)
+                project.dependencies.add("implementation", roommateDependencies.roomRuntime)
             is KotlinMultiplatformExtension ->
-                dependencies.add("commonMainImplementation", roommateDependencies.roomRuntime)
+                project.dependencies.add("commonMainImplementation", roommateDependencies.roomRuntime)
+        }
+    }
+
+    override fun withKspRoomCompiler(predicate: (KotlinTarget) -> Boolean) {
+        require(project.plugins.hasPlugin("com.google.devtools.ksp")) {
+            "The KSP plugin must be applied before calling withKspRoomCompiler."
+        }
+        when (val kotlinProjectExtension = project.kotlinExtension) {
+            is KotlinSingleTargetExtension<*> -> project.dependencies.add("ksp", roommateDependencies.roomCompiler)
+            is KotlinMultiplatformExtension ->
+                kotlinProjectExtension.targets.configureEach {
+                    if (platformType == KotlinPlatformType.common) return@configureEach
+                    if (predicate(this).not()) return@configureEach
+                    project.dependencies.add("ksp${name.capitalize()}", roommateDependencies.roomCompiler)
+                }
         }
     }
 

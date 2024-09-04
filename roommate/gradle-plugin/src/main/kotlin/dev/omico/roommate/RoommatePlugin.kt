@@ -19,7 +19,6 @@ import dev.omico.roommate.internal.RoommateExtensionImpl
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
-import org.jetbrains.kotlin.gradle.dsl.KotlinProjectExtension
 
 @Suppress("unused")
 class RoommatePlugin : Plugin<Project> {
@@ -37,11 +36,6 @@ class RoommatePlugin : Plugin<Project> {
                 publicType = RoommateExtension::class,
                 name = "roommate",
                 instanceType = RoommateExtensionImpl::class,
-                constructionArguments = arrayOf(
-                    resources,
-                    dependencies,
-                    extensions.getByName("kotlin") as KotlinProjectExtension,
-                ),
             )
         }
 }

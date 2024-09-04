@@ -58,15 +58,19 @@ plugins {
 //}
 
 roommate {
-    roomVersion(versions.androidx.room) // The version of the Room library.
+    // The version of the Room library.
+    roomVersion(versions.androidx.room)
+
+    // Add the Room compiler.
+    // If you only have Android & Desktop targets, withKspRoomCompiler() is same as the following.
+    // withKspRoomCompiler { target ->
+    //    target.platformType == KotlinPlatformType.jvm || target.platformType == KotlinPlatformType.androidJvm
+    // }
+    withKspRoomCompiler()
+
     dependencies {
         commonMainImplementation(roomPaging)
         desktopMainImplementation(sqliteBundle)
-    }
-    dependencies {
-        // "roomCompiler" is defined by Roommate.
-        kspAndroid(roomCompiler)
-        kspDesktop(roomCompiler)
     }
 }
 ```

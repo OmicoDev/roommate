@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.omico.roommate
+package dev.omico.roommate.internal.utility
 
-import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import java.util.Locale
 
-interface RoommateExtension {
-    fun roomVersion(version: String)
-    fun withKspRoomCompiler(predicate: (KotlinTarget) -> Boolean = { true })
-    val DependencyHandler.roomCompiler: String
-    val DependencyHandler.roomRuntime: String
-    val DependencyHandler.roomPaging: String
-    val DependencyHandler.sqliteBundle: String
-}
+internal fun String.capitalize(locale: Locale = Locale.ROOT): String =
+    replaceFirstChar { char ->
+        when {
+            char.isLowerCase() -> char.titlecase(locale)
+            else -> char.toString()
+        }
+    }
